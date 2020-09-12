@@ -1,113 +1,118 @@
-require 'rspec'
-require './solution/Rectangle'
+# frozen_string_literal: true
 
-TestCase = Struct.new(:corners1, :corners2)
-Corners = Struct.new(:top_left, :bottom_right) do
-  def to_s
-    "{TL = [#{top_left[0]}, #{top_left[1]}], BR = [#{bottom_right[0]}, #{bottom_right[1]}]}"
-  end
-end
+require 'rspec'
+require_relative '../solution/rectangle'
 
 RSpec.describe Rectangle do
-  describe "should overlap having" do
-    [
-        TestCase.new(
-            Corners.new([5, 15], [9, 4]),
-            Corners.new([7, 11], [17, 6])
-        ),
-        TestCase.new(
-            Corners.new([7, 11], [17, 6]),
-            Corners.new([5, 15], [9, 4])
-        ),
-        TestCase.new(
-            Corners.new([1, 5], [8, 1]),
-            Corners.new([8, 9], [15, 5])
-        ),
-        TestCase.new(
-            Corners.new([8, 9], [15, 5]),
-            Corners.new([1, 5], [8, 1])
-        ),
-        TestCase.new(
-            Corners.new([3, 12], [13, 6]),
-            Corners.new([4, 11], [12, 7])
-        ),
-        TestCase.new(
-            Corners.new([4, 11], [12, 7]),
-            Corners.new([3, 12], [13, 6])
-        ),
-        TestCase.new(
-            Corners.new([10, 10], [20, 5]),
-            Corners.new([5, 8], [21, 4])
-        ),
-        TestCase.new(
-            Corners.new([5, 8], [21, 4]),
-            Corners.new([10, 10], [20, 5])
-        ),
-        TestCase.new(
-            Corners.new([5, 8], [21, 4]),
-            Corners.new([4, 7], [20, 3])
-        ),
-        # Rectangles are same
-        TestCase.new(
-            Corners.new([5, 8], [21, 4]),
-            Corners.new([5, 8], [21, 4])
-        ),
-        # Negative coordinates cases
-        TestCase.new(
-            Corners.new([-10, -1], [-1, -6]),
-            Corners.new([-9, -2], [-2, -5]),
-        ),
-        # And reverse
-        TestCase.new(
-            Corners.new([-9, -2], [-2, -5]),
-            Corners.new([-10, -1], [-1, -6])
-        ),
-    ].each do |tc|
-      it "#{tc.corners1} with rectangle having #{tc.corners2} corners" do
-        rectangle1 = new_rectangle tc.corners1
-        rectangle2 = new_rectangle tc.corners2
+  let(:subject) { rectangle_1.overlaps?(rectangle_2) }
+  2.times do |i|
+    let("rectangle_#{i + 1}".to_sym) do
+      top_left = corners_list[i].x
+      bottom_right = corners_list[i].y
 
-        expect(rectangle1.overlaps(rectangle2)).to be true
-      end
+      Rectangle.new(
+        top_left[0], top_left[1],
+        bottom_right[0], bottom_right[1]
+      )
     end
   end
 
-  describe "should NOT overlap having" do
+  context 'overlaps' do
     [
-        TestCase.new(
-            Corners.new([4, 4], [3, 3]),
-            Corners.new([2, 2], [1, 1])
-        ),
-        TestCase.new(
-            Corners.new([1, 9], [7, 4]),
-            Corners.new([12, 16], [17, 6])
-        ),
-        TestCase.new(
-            Corners.new([12, 16], [17, 6]),
-            Corners.new([1, 9], [7, 4])
-        ),
-        TestCase.new(
-            Corners.new([5, 9], [12, 5]),
-            Corners.new([9, 15], [15, 10])
-        ),
-        TestCase.new(
-            Corners.new([9, 15], [15, 10]),
-            Corners.new([5, 9], [12, 5])
-        )
-    ].each do |tc|
-      it "#{tc.corners1} with rectangle having #{tc.corners2} corners" do
-        rectangle1 = new_rectangle tc.corners1
-        rectangle2 = new_rectangle tc.corners2
-
-        expect(rectangle1.overlaps(rectangle2)).to be false
+      [
+        [5, 15], [9, 4],
+        [7, 11], [17, 6]
+      ],
+      [
+        [7, 11], [17, 6],
+        [5, 15], [9, 4]
+      ],
+      [
+        [1, 5], [8, 1],
+        [8, 9], [15, 5]
+      ],
+      [
+        [8, 9], [15, 5],
+        [1, 5], [8, 1]
+      ],
+      [
+        [3, 12], [13, 6],
+        [4, 11], [12, 7]
+      ],
+      [
+        [4, 11], [12, 7],
+        [3, 12], [13, 6]
+      ],
+      [
+        [10, 10], [20, 5],
+        [5, 8], [21, 4]
+      ],
+      [
+        [5, 8], [21, 4],
+        [10, 10], [20, 5]
+      ],
+      [
+        [5, 8], [21, 4],
+        [4, 7], [20, 3]
+      ],
+      # Rectangles are same
+      [
+        [5, 8], [21, 4],
+        [5, 8], [21, 4]
+      ],
+      # Negative coordinates cases
+      [
+        [-10, -1], [-1, -6],
+        [-9, -2], [-2, -5]
+      ],
+      # And reverse
+      [
+        [-9, -2], [-2, -5],
+        [-10, -1], [-1, -6]
+      ]
+    ].each do |test_case|
+      let(:corners_list) do
+        [
+          Corner.new(*test_case[..1]),
+          Corner.new(*test_case[2..])
+        ]
       end
+
+      it { is_expected.to be true }
     end
   end
 
-  def new_rectangle(corners)
-    Rectangle.new(
-        corners.top_left[0], corners.top_left[1],
-        corners.bottom_right[0], corners.bottom_right[1]
-    )
+  context 'does not overlap' do
+    [
+      [
+        [4, 4], [3, 3],
+        [2, 2], [1, 1]
+      ],
+      [
+        [1, 9], [7, 4],
+        [12, 16], [17, 6]
+      ],
+      [
+        [12, 16], [17, 6],
+        [1, 9], [7, 4]
+      ],
+      [
+        [5, 9], [12, 5],
+        [9, 15], [15, 10]
+      ],
+      [
+        [9, 15], [15, 10],
+        [5, 9], [12, 5]
+      ]
+    ].each do |test_case|
+      let(:corners_list) do
+        [
+          Corner.new(*test_case[..1]),
+          Corner.new(*test_case[2..])
+        ]
+      end
+
+      it { is_expected.to be false }
+    end
   end
 end
